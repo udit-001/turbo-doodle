@@ -69,7 +69,6 @@ class Node:
         if node.has_children:
             for child in node.children:
                 result.extend(Node.search(child, data))
-        # print(result)
         return result
 
     @staticmethod

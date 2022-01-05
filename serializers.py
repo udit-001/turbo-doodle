@@ -2,12 +2,14 @@ from marshmallow import Schema, fields, validate
 
 
 class DimensionSchema(Schema):
-    key = fields.String()
-    val = fields.String()
+    key = fields.String(required=True)
+    val = fields.String(required=True)
+
 
 class MetricSchema(Schema):
-    key = fields.String()
-    val = fields.Integer()
+    key = fields.String(required=True)
+    val = fields.Integer(required=True)
+
 
 class InsertSchema(Schema):
     dim = fields.List(
@@ -21,8 +23,10 @@ class InsertSchema(Schema):
         fields.Nested(
             MetricSchema()
         ),
-        validate=validate.Length(min=1)
+        validate=validate.Length(min=1),
+        required=True
     )
+
 
 class SearchSchema(Schema):
     dim = fields.List(
@@ -31,4 +35,3 @@ class SearchSchema(Schema):
         ),
         validate=validate.Length(min=1)
     )
-

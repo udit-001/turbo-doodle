@@ -20,9 +20,9 @@ class Node:
         children = []
         if self.level == 2:
             return children
-        
+
         if self.level == 1:
-            return children + self.children 
+            return children + self.children
 
         if self.level == 0:
             children += self.children
@@ -58,11 +58,11 @@ class Node:
                 for key in item.items():
                     oj.append(key)
                 node_dimensions.append(oj)
-        
+
         if node.data.get('dim') is None:
             if data.items() <= node.data.items():
                 result.append(node)
-        elif (all([True if i in node_dimensions else False for i in dimensions]) 
+        elif (all([True if i in node_dimensions else False for i in dimensions])
                 and node.data.get('dim') is not None):
             if node.data['dim'] == data['dim']:
                 result.append(node)
@@ -77,7 +77,8 @@ class Node:
         search_data = deepcopy(data)
         search_data.pop('metrics')
         parent_data = search_data
-        parent_data['dim'] = [i for i in search_data['dim'] if i['key'] == "country"]
+        parent_data['dim'] = [
+            i for i in search_data['dim'] if i['key'] == "country"]
         return Node.search(node, parent_data)
 
     @staticmethod
@@ -88,12 +89,12 @@ class Node:
         if level == 0:
             return node.parent
 
-
     def update_parents(self):
         for i in range(self.level):
             parent = Node.go_back(self, i)
-            parent_metrics = {item['key']:item['val'] for item in parent.data.get('metrics')}
-            node_metrics = {j['key']:j['val'] for j in self.data['metrics']}
+            parent_metrics = {item['key']: item['val']
+                              for item in parent.data.get('metrics')}
+            node_metrics = {j['key']: j['val'] for j in self.data['metrics']}
             for key, val in node_metrics.items():
                 parent_metrics[key] += val
             metrics_data = [
@@ -118,7 +119,8 @@ class Node:
                 parent = Node.check_for_parent(node, data)
                 if "country" in dimensions and len(parent) == 0:
                     new_data = deepcopy(data)
-                    new_data['dim'] = [i for i in new_data['dim'] if i['key'] == "country"]
+                    new_data['dim'] = [i for i in new_data['dim']
+                                       if i['key'] == "country"]
 
                     level_1 = Node(1, new_data)
                     node.add_child(level_1, update_parent=False)
@@ -128,8 +130,9 @@ class Node:
                     parent.add_child(Node(2, data), update_parent=True)
         else:
             found_node = result[0]
-            node_metrics = {item['key']:item['val'] for item in found_node.data['metrics']}
-            data_metrics = {j['key']:j['val'] for j in data['metrics']}
+            node_metrics = {item['key']: item['val']
+                            for item in found_node.data['metrics']}
+            data_metrics = {j['key']: j['val'] for j in data['metrics']}
             for key, val in node_metrics.items():
                 if data_metrics.get(key):
                     data_metrics[key] += val
@@ -143,5 +146,3 @@ class Node:
                 for key, value in data_metrics.items()
             ]
             found_node.data['metrics'] = metrics_data
-
-

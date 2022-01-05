@@ -9,6 +9,7 @@ from tree import Node
 app = Flask(__name__)
 tree = create_tree()
 
+
 @app.route('/v1/insert', methods=["POST"])
 def insert():
     global tree
@@ -22,6 +23,7 @@ def insert():
         return jsonify({"detail": "Malformed JSON received"}), 400
     updated_node = Node.search(tree, data)[0]
     return jsonify(updated_node.data), 200
+
 
 @app.route('/v1/query', methods=["GET"])
 def query():
@@ -37,6 +39,7 @@ def query():
     if len(result) == 0:
         return jsonify({"detail": "Not Found"}), 404
     return jsonify(result[0].data)
+
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -11,17 +11,20 @@ tree = create_tree()
 
 @app.route('/v1/insert', methods=["POST"])
 def insert():
+    global tree
     serializer = InsertSchema()
     try:
         data = serializer.load(data=request.get_json())
+        Node.insert(tree, data)
     except ValidationError as error:
         return jsonify(error.messages), 400
     except BadRequest:
         return jsonify({"detail": "Malformed JSON received"}), 400
-    return jsonify(data)
+    updated_node = Node.search(tree, data)[0]
+    return jsonify(updated_node.data), 200
 
 @app.route('/v1/query', methods=["GET"])
-def search():
+def query():
     global tree
     serializer = SearchSchema()
     try:
@@ -32,7 +35,7 @@ def search():
         return jsonify({"detail": "Malformed JSON received"}), 400
     result = Node.search(tree, data)
     if len(result) == 0:
-        return "", 404
+        return jsonify({"detail": "Not Found"}), 404
     return jsonify(result[0].data)
 
 if __name__ == "__main__":

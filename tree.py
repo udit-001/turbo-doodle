@@ -31,9 +31,12 @@ class Node:
 
             return children
 
-    def add_child(self, obj):
+    def add_child(self, obj, update_parent=False):
         obj.parent = self
         self.children.append(obj)
+
+        if update_parent:
+            obj.update_parents()
 
     def __repr__(self):
         return f"<Node: {json.dumps(self.data)}>"
@@ -61,10 +64,12 @@ class Node:
                 result.append(node)
         elif (all([True if i in node_dimensions else False for i in dimensions]) 
                 and node.data.get('dim') is not None):
-            result.append(node)
+            if node.data['dim'] == data['dim']:
+                result.append(node)
         if node.has_children:
             for child in node.children:
                 result.extend(Node.search(child, data))
+        # print(result)
         return result
 
     @staticmethod
@@ -76,14 +81,39 @@ class Node:
         return Node.search(node, parent_data)
 
     @staticmethod
-    def search_for_insert(node, data):
+    def go_back(node, level):
+        if level == 1:
+            return node.parent.parent
+
+        if level == 0:
+            return node.parent
+
+
+    def update_parents(self):
+        for i in range(self.level):
+            parent = Node.go_back(self, i)
+            parent_metrics = {item['key']:item['val'] for item in parent.data.get('metrics')}
+            node_metrics = {j['key']:j['val'] for j in self.data['metrics']}
+            for key, val in node_metrics.items():
+                parent_metrics[key] += val
+            metrics_data = [
+                {
+                    "key": key,
+                    "val": value
+                }
+                for key, value in parent_metrics.items()
+            ]
+            parent.data['metrics'] = metrics_data
+
+    @staticmethod
+    def insert(node, data):
         result = Node.search(node, data)
 
         if len(result) == 0:
             dimensions = [item["key"] for item in data['dim']]
             if len(dimensions) == 1:
                 if ['country'] == dimensions:
-                    node.add_child(Node(1, data))
+                    node.add_child(Node(1, data), update_parent=True)
             else:
                 parent = Node.check_for_parent(node, data)
                 if "country" in dimensions and len(parent) == 0:
@@ -91,23 +121,11 @@ class Node:
                     new_data['dim'] = [i for i in new_data['dim'] if i['key'] == "country"]
 
                     level_1 = Node(1, new_data)
-                    node.add_child(level_1)
-                    level_1.add_child(Node(2, data))
+                    node.add_child(level_1, update_parent=False)
+                    level_1.add_child(Node(2, data), update_parent=True)
                 else:
                     parent = parent[0]
-                    node_metrics = {item['key']:item['val'] for item in parent.data['metrics']}
-                    data_metrics = {j['key']:j['val'] for j in data['metrics']}
-                    for key, val in node_metrics.items():
-                        data_metrics[key] += val
-                    metrics_data = [
-                        {
-                            "key": key,
-                            "val": value
-                        }
-                        for key, value in data_metrics.items()
-                    ]
-                    parent.add_child(Node(2, data))
-                    parent.data['metrics'] = metrics_data
+                    parent.add_child(Node(2, data), update_parent=True)
         else:
             found_node = result[0]
             node_metrics = {item['key']:item['val'] for item in found_node.data['metrics']}

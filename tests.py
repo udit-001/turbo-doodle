@@ -20,8 +20,7 @@ class BaseTestCase(TestCase):
         tree = create_tree()
 
     def tearDown(self):
-        global tree
-        del tree
+        del globals()['tree']
 
 
 class SearchQueryTest(BaseTestCase):
@@ -43,12 +42,24 @@ class SearchQueryTest(BaseTestCase):
             self.assert404(response)
             self.assertEqual(response.json, {"detail": "Not Found"})
 
+    def test_search_no_result(self):
+        data = {
+            "dim": [
+                {
+                    "key": "country",
+                    "val": "KR"
+                }
+            ]
+        }
+        response = self.client.get(
+            self.SEARCH_URL, json=data, content_type='application/json')
+        self.assert404(response)
 
 class InsertNodeTests(BaseTestCase):
     def test_add_new_country(self):
         data = {
             "dim": [
-                {"key": "country", "val": "TR"}
+                {"key": "country", "val": "UK"}
             ],
             "metrics": [
                 {
@@ -98,7 +109,6 @@ class InsertNodeTests(BaseTestCase):
         parent_data = deepcopy(data)
         parent_data.pop('metrics')
         parent_data['dim'].pop()
-
         search_response = self.client.get(
             self.SEARCH_URL, json=parent_data, content_type='application/json')
         self.assert200(search_response)
@@ -135,6 +145,32 @@ class InsertNodeTests(BaseTestCase):
             response.json['metrics'][0]['val'], data['metrics'][0]['val'])
         self.assertGreaterEqual(
             response.json['metrics'][1]['val'], data['metrics'][1]['val'])
+
+    def test_partial_update_old_metrics(self):
+        data = {
+            "dim": [
+                {
+                    "key": "country",
+                    "val": "IN"
+                },
+                {
+                    "key": "device",
+                    "val": "mobile"
+                }
+            ],
+            "metrics": [
+                {
+                    "key": "webreq",
+                    "val": 70
+                }
+            ]
+        }
+        response = self.client.post(self.INSERT_URL,
+                                    json=data, content_type='application/json')
+        self.assert200(response)
+        self.assertEqual(response.json['dim'], data['dim'])
+        self.assertGreaterEqual(
+            response.json['metrics'][0]['val'], data['metrics'][0]['val'])
 
     def test_check_parent_metric_update(self):
         data = {
@@ -183,7 +219,20 @@ class InsertNodeTests(BaseTestCase):
                          [1]['val'] + new_node_data['metrics'][1]['val'])
 
 
+
 class APIValidationTests(BaseTestCase):
+    def test_search_malformed_json(self):
+        data = '{"dim": [}'
+        response = self.client.get(
+            self.SEARCH_URL, data=data, content_type="application/json")
+        self.assert400(response)
+
+    def test_insert_malformed_json(self):
+        data = '{"metrics": [}'
+        response = self.client.post(
+            self.INSERT_URL, data=data, content_type="application/json")
+        self.assert400(response)
+
     def test_search_api_empty_dims(self):
         data = {
             "dims": []

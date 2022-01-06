@@ -16,24 +16,22 @@ This will insert a node to the tree
 Payload:
 ```json
 {
-    “dim”: [{
-            “key”: “device”,
-            “val”: “mobile”
-        },
-        {
-            “key”: “country”,
-            “val”: “IN”
-        }
-    ],
-    “metrics”: [{
-            “key”: “webreq”,
-            “val”: 70
-        },
-        {
-            “key”: “timespent”,
-            “val”: 30
-        }
-    ]
+   "dim":[
+      {
+         "key":"country",
+         "val":"US"
+      }
+   ],
+   "metrics":[
+      {
+         "key":"webreq",
+         "val":220
+      },
+      {
+         "key":"timespent",
+         "val":180
+      }
+   ]
 }
 ```
 RES: 200 OK
@@ -45,29 +43,34 @@ This is used to query an existing node in the tree
 Payload:
 ```json
 {
-    “dim”: [{
-        “
-        key”: “country”“ val”: “US”
-    }]
+   "dim":[
+      {
+         "key":"country",
+         "val":"US"
+      }
+   ]
 }
 ```
 
 Output:
 ```json
 {
-    “dim”: [{
-        “key”: “country”,
-        “val”: “US”
-    }],
-    “metrics”: [{
-            “key”: “webreq”,
-            “val”: 220
-        },
-        {
-            “key”: “timespent”,
-            “val”: 180
-        }
-    ]
+   "dim":[
+      {
+         "key":"country",
+         "val":"US"
+      }
+   ],
+   "metrics":[
+      {
+         "key":"webreq",
+         "val":220
+      },
+      {
+         "key":"timespent",
+         "val":180
+      }
+   ]
 }
 ```
 

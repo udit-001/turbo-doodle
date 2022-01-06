@@ -15,22 +15,6 @@ class Node:
             return True
         return False
 
-    @property
-    def descendants(self):
-        children = []
-        if self.level == 2:
-            return children
-
-        if self.level == 1:
-            return children + self.children
-
-        if self.level == 0:
-            children += self.children
-            for i in self.children:
-                children += i.children
-
-            return children
-
     def add_child(self, obj, update_parent=False):
         obj.parent = self
         self.children.append(obj)
@@ -120,7 +104,6 @@ class Node:
                     new_data = deepcopy(data)
                     new_data['dim'] = [i for i in new_data['dim']
                                        if i['key'] == "country"]
-
                     level_1 = Node(1, new_data)
                     node.add_child(level_1, update_parent=False)
                     level_1.add_child(Node(2, data), update_parent=True)
